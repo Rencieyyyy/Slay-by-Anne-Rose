@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Slay by Anne&amp;Rose | Rent a dress and Slay the moment</title>
+<link rel="icon" type="image/png" href="slaylogo.png">
+<link rel="apple-touch-icon" href="slaylogo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+    </button>
+
+    <a class="brand" href="#" aria-label="Slay by Anne and Rose, home"><span class="b1">Slay</span><span class="b2">by Anne &amp; Rose</span></a>
+
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#home" aria-current="page">Home</a>
+      <a href="#about">About us</a>
+      <a href="#shop">Shop</a>
+      <a href="#blog">Blog</a>
+    </nav>
+
+    <div class="tools">
+      <form class="search" id="search" role="search" onsubmit="return false">
+        <input type="search" id="q" placeholder="Search dresses…" aria-label="Search dresses">
+        <button class="icon-btn" type="submit" aria-label="Search" style="min-width:32px;min-height:32px">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+      </form>
+      <button class="icon-btn search-btn" id="searchBtn" aria-label="Open search" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="icon-btn" id="favBtn" aria-label="Favorites">
+        <svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.1-8 11-8 11Z"/></svg>
+        <span class="count" id="favCount" aria-live="polite">(0)</span>
+      </button>
+      <button class="icon-btn" id="cartBtn" aria-label="Cart">
+        <svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="count" id="cartCount" aria-live="polite">(0)</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="home">
+  <!-- ===== HERO SECTION: replace this whole <section> with your own hero ===== -->
+<section class="hero">
+  <img src="dressv1.png" alt="Woman wearing a rental gown" class="hero-img">
+
+  <div class="hero-text">
+    <h1>Rent a dress and Slay the moment</h1>
+    <a href="#shop" class="hero-btn">Shop now</a>
+  </div>
+</section>
+  <!-- ===== END HERO SECTION ===== -->
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-media">
+      <video
+        poster="images/about.jpg"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-label="Anne and Rose in the Slay showroom">
+        <source src="slayvideo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <div class="about-copy">
+      <h2>Two friends, one closet, no more wearing it once</h2>
+      <p>Slay by Anne&amp;Rose started with a simple question: why buy a gown you'll wear for one night? We built a rental closet of premium dresses so you can walk into any event looking unforgettable, without the price tag or the dress sitting in your wardrobe afterwards.</p>
+      <p>Every dress is cleaned, pressed and checked before it reaches you, and our team helps you find the right fit for the occasion.</p>
+
+      <ul class="about-points">
+        <li><strong>Pick</strong><span>Browse by occasion, size and date.</span></li>
+        <li><strong>Wear</strong><span>Delivered ready to wear, with a backup size on request.</span></li>
+        <li><strong>Return</strong><span>Send it back. We handle the cleaning.</span></li>
+      </ul>
+
+      <a href="#shop" class="about-btn">Browse the closet</a>
+    </div>
+  </div>
+</section>
+
+
+<section class="shop" id="shop">
+  <div class="shop-inner">
+    <h2>Shop the closet</h2>
+    <p class="shop-sub">Pre-loved pieces, checked and ready for their next moment.</p>
+
+    <div class="shop-tabs" role="tablist" aria-label="Shop categories">
+      <button class="shop-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+      <button class="shop-tab" data-filter="long-dress" role="tab" aria-selected="false">Long Dress</button>
+      <button class="shop-tab" data-filter="short-dress" role="tab" aria-selected="false">Short Dress</button>
+      <button class="shop-tab" data-filter="bag" role="tab" aria-selected="false">Bag</button>
+      <button class="shop-tab" data-filter="accessories" role="tab" aria-selected="false">Accessories</button>
+      <button class="shop-tab" data-filter="shoes" role="tab" aria-selected="false">Shoes</button>
+      <button class="shop-tab" data-filter="filipiniana" role="tab" aria-selected="false">Filipiniana</button>
+    </div>
+
+    <div class="shop-grid">
+
+      <!-- LONG DRESS (with color slider) -->
+     <!-- LONG DRESS (slide sample) -->
+<article class="product" data-category="long-dress">
+  <div class="product-img">
+    <img src="dressing.png" alt="Long dress in pink" data-color="Pink" loading="lazy">
+    <img src="dressing.png" alt="Long dress in blue" data-color="Blue" loading="lazy">
+    <img src="dressing.png" alt="Long dress in gold" data-color="Gold" loading="lazy">
+    <span class="product-tag">Long Dress</span>
+  </div>
+  <div class="product-info">
+    <h3>Long Dress Name</h3>
+    <p class="product-desc">Short description, size and color.</p>
+    <p class="product-worn">Last worn: March 2026</p>
+    <div class="product-bottom">
+      <span class="product-price">₱2,500</span>
+      <a href="#" class="product-btn">Inquire</a>
+    </div>
+  </div>
+</article>
+
+      <!-- SHORT DRESS -->
+      <article class="product" data-category="short-dress">
+        <div class="product-img">
+          <img src="dressing.png" alt="Short dress name" data-color="Pink" loading="lazy">
+          <span class="product-tag">Short Dress</span>
+        </div>
+        <div class="product-info">
+          <h3>Short Dress Name</h3>
+          <p class="product-desc">Short description, size and color.</p>
+          <p class="product-worn">Last worn: March 2026</p>
+          <div class="product-bottom">
+            <span class="product-price">₱1,800</span>
+            <a href="#" class="product-btn">Inquire</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- BAG -->
+      <article class="product" data-category="bag">
+        <div class="product-img">
+          <img src="dressing.png" alt="Bag name" data-color="Black" loading="lazy">
+          <span class="product-tag">Bag</span>
+        </div>
+        <div class="product-info">
+          <h3>Bag Name</h3>
+          <p class="product-desc">Short description of the bag.</p>
+          <p class="product-worn">Last used: March 2026</p>
+          <div class="product-bottom">
+            <span class="product-price">₱1,200</span>
+            <a href="#" class="product-btn">Inquire</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- ACCESSORIES -->
+      <article class="product" data-category="accessories">
+        <div class="product-img">
+          <img src="dressing.png" alt="Accessory name" data-color="Gold" loading="lazy">
+          <span class="product-tag">Accessories</span>
+        </div>
+        <div class="product-info">
+          <h3>Accessory Name</h3>
+          <p class="product-desc">Short description of the accessory.</p>
+          <p class="product-worn">Last used: March 2026</p>
+          <div class="product-bottom">
+            <span class="product-price">₱500</span>
+            <a href="#" class="product-btn">Inquire</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- SHOES -->
+      <article class="product" data-category="shoes">
+        <div class="product-img">
+          <img src="dressing.png" alt="Shoes name" data-color="Nude" loading="lazy">
+          <span class="product-tag">Shoes</span>
+        </div>
+        <div class="product-info">
+          <h3>Shoes Name</h3>
+          <p class="product-desc">Short description, size and heel height.</p>
+          <p class="product-worn">Last worn: March 2026</p>
+          <div class="product-bottom">
+            <span class="product-price">₱1,800</span>
+            <a href="#" class="product-btn">Inquire</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- FILIPINIANA -->
+      <article class="product" data-category="filipiniana">
+        <div class="product-img">
+          <img src="dressing.png" alt="Filipiniana name" data-color="White" loading="lazy">
+          <span class="product-tag">Filipiniana</span>
+        </div>
+        <div class="product-info">
+          <h3>Filipiniana Name</h3>
+          <p class="product-desc">Short description of the Filipiniana piece.</p>
+          <p class="product-worn">Last worn: March 2026</p>
+          <div class="product-bottom">
+            <span class="product-price">₱3,000</span>
+            <a href="#" class="product-btn">Inquire</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== BLOG ===== -->
+<section class="blog" id="blog">
+  <div class="blog-inner">
+    <p class="blog-eyebrow">The Slay Journal</p>
+    <h2>Look stunning. Spend wisely.</h2>
+    <p class="blog-sub">Styling tips, event ideas and rental guides from Anne &amp; Rose.</p>
+
+    <div class="blog-grid">
+
+      <article class="post">
+        <a href="#" class="post-img">
+          <img src="images/blog1.jpg" alt="Woman in a rented gown at an event" loading="lazy">
+        </a>
+        <div class="post-body">
+          <div class="post-meta"><span>Rental Guide</span><span>•</span><time datetime="2026-03-10">March 10, 2026</time></div>
+          <h3><a href="#">Why rent a gown instead of buying one?</a></h3>
+          <p>You'll wear it for one night, so why pay for it forever? Renting gives you a stunning dress at a fraction of the price, starting at just ₱300, with no closet space needed.</p>
+          <a href="#" class="post-link">Read more</a>
+        </div>
+      </article>
+
+      <article class="post">
+        <a href="#" class="post-img">
+          <img src="images/blog2.jpg" alt="Fitting day at the Slay showroom" loading="lazy">
+        </a>
+        <div class="post-body">
+          <div class="post-meta"><span>Styling Tips</span><span>•</span><time datetime="2026-03-24">March 24, 2026</time></div>
+          <h3><a href="#">How to book your fitting in 3 easy steps</a></h3>
+          <p>Message us, pick your date and occasion, and try on your favorites. Our team helps you find the right fit so you walk into your event confident and comfortable.</p>
+          <a href="#" class="post-link">Read more</a>
+        </div>
+      </article>
+
+      <article class="post">
+        <a href="#" class="post-img">
+          <img src="images/blog3.jpg" alt="Dress paired with shoes and accessories" loading="lazy">
+        </a>
+        <div class="post-body">
+          <div class="post-meta"><span>Occasions</span><span>•</span><time datetime="2026-04-07">April 7, 2026</time></div>
+          <h3><a href="#">What to wear: weddings, proms and debuts</a></h3>
+          <p>Every event has its own dress code. Here's a quick guide to choosing between long gowns, short dresses and Filipiniana, plus the bags and accessories that finish the look.</p>
+          <a href="#" class="post-link">Read more</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+  <div class="footer-cta">
+    <h2>Your next event look starts here!</h2>
+    <p>Message Slay by Anne&amp;Rose to book your fitting today.</p>
+    <a href="https://www.facebook.com/share/1JVDcaen61/?mibextid=wwXIfr" class="footer-btn" target="_blank" rel="noopener">Message us</a>
+  </div>
+
+  <div class="footer-inner">
+    <div class="footer-col footer-brand">
+      <a class="brand" href="#home" aria-label="Slay by Anne and Rose, home"><span class="b1">Slay</span><span class="b2">by Anne &amp; Rose</span></a>
+      <p>Rent a dress and Slay the moment. Gorgeous dresses, affordable prices, perfect for your special moments.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About us</a></li>
+        <li><a href="#shop">Shop</a></li>
+        <li><a href="#blog">Blog</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="tel:09433240717">0943 324 0717</a></li>
+        <li><a href="mailto:cristimaryrose@gmail.com">cristimaryrose@gmail.com</a></li>
+        <li>96 A. Mabini St. Burgos, Rodriguez (Montalban), Rizal 1860</li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Follow us</h4>
+      <a href="https://www.facebook.com/share/1JVDcaen61/?mibextid=wwXIfr" class="footer-social" target="_blank" rel="noopener" aria-label="Slay by Anne and Rose on Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8.5V6.8c0-.8.5-1 .9-1H17V2h-3c-3.1 0-4.5 2-4.5 4.4v2.1H7V12h2.5v10H14V12h2.7l.4-3.5H14Z"/></svg>
+        <span>Facebook</span>
+      </a>
+      <p class="footer-note">Starting at just ₱300!</p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; <span id="year">2026</span> Slay by Anne&amp;Rose. All rights reserved.</p>
+    <p>Look stunning. Spend wisely. SLAY EVERY MOMENT!</p>
+  </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
