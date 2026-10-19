@@ -328,3 +328,33 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 /* Move the color name below the heart so they don't overlap */
 .color-label{top:56px}
 .product{background:#240f26}
+/* ---------- White sections with a touch of plum ---------- */
+.about,.shop,.blog{
+  --paper:#ffffff;
+  --text:#2b1030;
+  --muted:#6b5a6e;
+  --line:#ecdcec;
+  --hdr-text:#4A154B;
+  --hdr-dim:#6B1D70;
+  color:var(--text);
+}
+
+.about{background:linear-gradient(180deg,#ffffff 0%,#fbf4fb 100%)}
+.shop{background:#ffffff;border-top:3px solid #4A154B}
+.blog{background:linear-gradient(180deg,#fbf4fb 0%,#ffffff 100%);border-top:1px solid #ecdcec}
+
+/* Shop cards */
+.shop .product{background:#ffffff;border:1px solid #ecdcec}
+.shop .product:hover{box-shadow:0 12px 28px rgba(74,21,75,.18)}
+.shop .shop-tab{background:#ffffff;color:#6B1D70;border:1px solid #e3cfe3}
+.shop .shop-tab:hover{border-color:#D4AF37;color:#D81B8A}
+.shop .shop-tab.active{background:#D81B8A;color:#ffffff;border-color:#D81B8A;border-bottom:2px solid #D4AF37}
+
+/* Blog cards */
+.blog .post{background:#ffffff;border:1px solid #ecdcec}
+
+/* Plum touches */
+.about-copy h2,.shop-inner h2,.blog-inner h2{color:#4A154B}
+.about-points{border-top:1px solid #4A154B}
+.about-points strong{color:#6B1D70}
+.product-info h3,.post-body h3{color:#4A154B}
