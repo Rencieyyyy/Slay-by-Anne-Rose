@@ -1,9 +1,10 @@
 :root{
-  --ink:#4A154B; --paper:#FFFFFF; --text:#2b1030; --muted:#6b5a6e; --line:#efe3ee; --gold:#D4AF37; --gold-lt:#E5C158; --rose:#F7A8C4; --lav:#C8C3E6;
-  --hdr:#FFFFFF; --hdr-text:#4A154B; --hdr-dim:#6B1D70; --accent:#D81B8A;
+  --ink:#4A154B; --gold:#D4AF37; --gold-lt:#E5C158; --rose:#F7A8C4; --lav:#C8C3E6;
+  --paper:#1a0a1b; --text:#f6e9f3; --muted:#bfa9bd; --line:#3a1f3c;
+  --hdr:#2a0e2c; --hdr-text:#fff; --hdr-dim:#C8C3E6; --accent:#D81B8A;
   --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
   --sans:"Jost","Helvetica Neue",Arial,sans-serif;
-  color-scheme:light;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -326,3 +327,4 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 
 /* Move the color name below the heart so they don't overlap */
 .color-label{top:56px}
+.product{background:#240f26}
