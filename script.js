@@ -269,3 +269,28 @@ document.getElementById('year').textContent = new Date().getFullYear();
     });
   });
 })();
+ // Open
+  document.querySelectorAll('button.post-link[data-modal]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById(btn.dataset.modal).showModal();
+  });
+});
+
+document.querySelectorAll('.post-modal').forEach(modal => {
+  modal.querySelector('.modal-close').addEventListener('click', () => modal.close());
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.close();
+  });
+});document.querySelectorAll('[data-modal]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById(el.dataset.modal).showModal();
+  });
+});
+
+document.querySelectorAll('.post-modal').forEach(modal => {
+  modal.querySelector('.modal-close').addEventListener('click', () => modal.close());
+  modal.addEventListener('click', e => {
+    if (e.target === modal) modal.close();
+  });
+});

@@ -10,8 +10,6 @@
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 
-  :root[data-theme="dark"]{--paper:#1a0a1b;--text:#f6e9f3;--muted:#bfa9bd;--line:#3a1f3c;--hdr:#2a0e2c;--hdr-text:#fff;--hdr-dim:#C8C3E6;color-scheme:dark}
-
 :root[data-theme="dark"]{--paper:#1a0a1b;--text:#f6e9f3;--muted:#bfa9bd;--line:#3a1f3c;--hdr:#2a0e2c;--hdr-text:#fff;--hdr-dim:#C8C3E6;color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px)}
@@ -421,7 +419,7 @@ html,body{overflow-x:hidden}
   .product-desc{-webkit-line-clamp:unset}
 }
 .toast{z-index:130}
-/* ---------- Favorites + Cart drawer (paste at the very bottom of style.css) ---------- */
+/* ---------- Favorites + Cart drawer ---------- */
 body.fc-lock{overflow:hidden}
 .fc-wrap[hidden]{display:none}
 .fc-wrap{position:fixed;inset:0;z-index:120}
@@ -476,3 +474,65 @@ body.fc-lock{overflow:hidden}
 .product-btn{cursor:pointer}
 
 @media (prefers-reduced-motion:reduce){.fc-drawer,.fc-overlay{animation:none}}
+
+/* ---------- Blog card video + popup ---------- */
+.post-media{
+  aspect-ratio:16/10;
+  background:#000;
+  overflow:hidden;
+}
+.post-media video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* "Read more" button looks the same as the link version */
+button.post-link{
+  margin-top:auto;
+  padding:6px 0 3px;
+  align-self:flex-start;
+  font-size:.75rem;
+  font-weight:600;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  border-bottom:2px solid var(--gold);
+  transition:color .25s;
+}
+button.post-link:hover{color:var(--hdr-dim)}
+
+/* Popup */
+.post-modal{
+  width:min(600px,calc(100% - 32px));
+  max-height:85vh;
+  overflow-y:auto;
+  margin:auto;
+  padding:32px 28px 28px;
+  border:0;
+  border-bottom:3px solid #D4AF37;
+  background:#fff;
+  color:#2b1030;
+  box-shadow:0 20px 60px rgba(26,10,27,.45);
+}
+.post-modal::backdrop{background:rgba(26,10,27,.7)}
+.post-modal[open]{animation:modalIn .25s ease-out}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+
+.post-modal h3{font-family:var(--serif);font-size:1.8rem;font-weight:600;line-height:1.15;margin:0 0 12px;color:#4A154B}
+.post-modal h4{font-family:var(--serif);font-size:1.25rem;font-weight:600;margin:20px 0 4px;color:#D81B8A}
+.post-modal p{margin:0;color:#6b5a6e;line-height:1.65}
+
+.modal-close{
+  position:sticky;top:0;float:right;
+  width:36px;height:36px;margin:-16px -12px 0 0;
+  border-radius:50%;background:#f4e8f4;color:#4A154B;
+  font-size:1.6rem;line-height:1;
+}
+.modal-close:hover{background:#ecdcec;color:#D81B8A}
+
+body:has(dialog[open]){overflow:hidden}.post-img{cursor:pointer}
+.post-modal .modal-list{margin:0;padding-left:20px;color:#6b5a6e;line-height:1.65}
+.post-modal .modal-list li{margin-bottom:6px}
+.post-modal .modal-tagline{margin-top:14px;font-family:var(--serif);font-size:1.25rem;font-weight:600;font-style:italic;color:#D81B8A}
