@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Slay Admin</title>
+<link rel="icon" href="../slaylogo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Jost:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="admin.css?v=3">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <span class="bokeh b1"></span><span class="bokeh b2"></span><span class="bokeh b3"></span>
+  <div class="login-card">
+    <svg class="blob" viewBox="0 0 580 600" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 0H470C565 45 600 170 540 300C495 400 560 520 440 600H0Z" fill="#f6eef8"/>
+    </svg>
+    <div class="login-art">
+      <div class="logo">Slay<small>by Anne &amp; Rose</small></div>
+      <div class="scene">
+        <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+        <!-- tries ../slaylogo.png first (logo in the main folder), then slaylogo.png (same folder) -->
+        <img class="loginlogo" src="../slaylogo.png" alt="Slay by Anne and Rose"
+             onerror="if(!this.dataset.t){this.dataset.t=1;this.src='slaylogo.png'}else{this.style.display='none'}">
+      </div>
+      <div class="copy">Admin portal</div>
+    </div>
+    <form class="login-form" id="loginForm" autocomplete="off">
+      <h1>Welcome back</h1>
+      <label for="lu">Email</label>
+      <input id="lu" type="email" autocomplete="username" placeholder="you@slay.com" required>
+      <label for="lp">Password</label>
+      <div class="pw">
+        <input id="lp" type="password" autocomplete="current-password" placeholder="Your password" required>
+        <button type="button" id="sp">Show</button>
+      </div>
+      <div class="err" id="lerr" role="alert"></div>
+      <button class="btn" id="lb">LOG IN</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" hidden>
+  <aside>
+    <div class="brand">Slay<small>by Anne &amp; Rose · Admin</small></div>
+    <nav id="nav"></nav>
+    <div class="livebadge" id="live">Live updates</div>
+    <div class="who"><b id="whoName"></b><span id="whoRole"></span><br><button class="btn sm ghost" id="logout">Sign out</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+<script src="admin.js?v=2"></script>
+</body>
+</html>

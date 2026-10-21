@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="slaylogo.png">
 <link rel="apple-touch-icon" href="slaylogo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -36,6 +36,10 @@
       </form>
       <button class="icon-btn search-btn" id="searchBtn" aria-label="Open search" aria-expanded="false">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="icon-btn js-track" type="button" aria-label="Track my booking" title="Track my booking">
+        <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/></svg>
+        <span class="count">Track</span>
       </button>
       <button class="icon-btn" id="favBtn" aria-label="Favorites">
         <svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.9-8-11A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5c0 6.1-8 11-8 11Z"/></svg>
@@ -426,7 +430,6 @@
     <p class="modal-tagline">Slay the moment, make memories, and rent with us!</p>
   </dialog>
 </article>
-
     </div>
   </div>
 </section>
@@ -452,6 +455,7 @@
         <li><a href="#about">About us</a></li>
         <li><a href="#shop">Shop</a></li>
         <li><a href="#blog">Blog</a></li>
+        <li><a href="#track" class="js-track">Track my booking</a></li>
       </ul>
     </div>
 
@@ -480,7 +484,7 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
-<script src="favcart.js"></script>
+   <script src="shop-live.js?v=7"></script>
+   <script src="track.js?v=1"></script>
 </body>
 </html>
