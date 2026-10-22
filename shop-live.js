@@ -77,3 +77,12 @@
     .catch(function (e) { console.error('Could not load dresses', e); })
     .then(boot);
 })();
+/* ---------- Rental policy popup (paste at the very bottom of shop-live.js) ---------- */
+(function(){
+  var fab = document.getElementById('policyFab');
+  var modal = document.getElementById('policyModal');
+  if (!fab || !modal) return;
+  fab.addEventListener('click', function(){ modal.showModal(); });
+  modal.querySelector('.policy-close').addEventListener('click', function(){ modal.close(); });
+  modal.addEventListener('click', function(e){ if (e.target === modal) modal.close(); });
+})();

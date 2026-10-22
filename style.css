@@ -582,3 +582,67 @@ body:has(dialog[open]){overflow:hidden}.post-img{cursor:pointer}
 }
 .fc-foot .fc-btn:disabled{opacity:.6;cursor:wait}
 .fc-foot .fc-clear{align-self:center;font-size:13px;color:#7a3a6e}
+/* ---------- Rental policy button + popup (paste at the very bottom of style.css) ---------- */
+.policy-fab{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  z-index:5;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:2px solid #fff;
+  background:#D81B8A;
+  color:#fff;
+  font:600 24px/1 var(--sans);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+  transition:transform .2s ease,background .2s ease;
+}
+.policy-fab:hover,
+.policy-fab:focus-visible{transform:scale(1.1);background:#6B1D70}
+
+.policy-modal{
+  position:fixed;
+  margin:auto;
+  width:min(92vw,420px);
+  max-height:85vh;
+  overflow-y:auto;
+  padding:26px 22px 22px;
+  border:0;
+  border-bottom:3px solid #D4AF37;
+  background:#fff;
+  color:#2b1030;
+  font-family:var(--sans);
+  box-shadow:0 20px 50px rgba(26,10,27,.45);
+}
+.policy-modal::backdrop{background:rgba(26,10,27,.7)}
+.policy-modal[open]{animation:modalIn .25s ease-out}
+.policy-modal h3{
+  margin:0 0 12px;
+  padding-right:30px;
+  font-family:var(--serif);
+  font-size:1.8rem;
+  font-weight:600;
+  color:#4A154B;
+}
+.policy-modal ul{margin:0;padding-left:18px}
+.policy-modal li{margin-bottom:8px;font-size:.92rem;line-height:1.45;color:#2b1030}
+.policy-modal li strong{color:#4A154B}
+.policy-modal .policy-note{margin:12px 0 0;font-size:.8rem;color:#6b5a6e}
+.policy-close{
+  position:absolute;
+  top:10px;
+  right:12px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#f4e8f4;
+  color:#4A154B;
+  font-size:1.6rem;
+  line-height:1;
+}
+.policy-close:hover{background:#ecdcec;color:#D81B8A}
