@@ -13,9 +13,9 @@
   const dt = (d) => new Date(d).toLocaleString('en-PH', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 
   const MAX_PHOTOS = 10;
-  const TABS = ['Overview', 'Bookings', 'Dresses', 'Rentals', 'Activity'];
+  const TABS = ['Overview', 'Bookings', 'Payments', 'Products', 'Rentals', 'Activity'];
   let tab = 'Overview', bf = 'Pending', items = [], loadT;   // items = photos in the dress form: {url, file?}
-  let D = { b: [], d: [], r: [], l: [] };
+  let D = { b: [], d: [], r: [], l: [], p: [] };
   const dlg = $('#dlg');
 
   function toast(m) {
@@ -63,21 +63,22 @@
   }
 
   async function load() {
-    const [b, d, r, l] = await Promise.all([
+    const [b, d, r, l, p] = await Promise.all([
       sb.from('bookings').select('*').order('created_at', { ascending: false }),
       sb.from('dresses').select('*').order('name'),
       sb.from('rentals').select('*').order('event_date', { ascending: false }),
-      sb.from('activity_log').select('*').order('created_at', { ascending: false }).limit(60)
+      sb.from('activity_log').select('*').order('created_at', { ascending: false }).limit(60),
+      sb.from('payments').select('*').order('created_at', { ascending: false }).limit(300)
     ]);
-    const err = b.error || d.error || r.error || l.error;
+    const err = b.error || d.error || r.error || l.error || p.error;
     if (err) toast('Load error: ' + err.message);
-    D = { b: b.data || [], d: d.data || [], r: r.data || [], l: l.data || [] };
+    D = { b: b.data || [], d: d.data || [], r: r.data || [], l: l.data || [], p: p.data || [] };
     render();
   }
 
   function live() {
     const ch = sb.channel('slay-live');
-    ['bookings', 'rentals', 'dresses', 'activity_log'].forEach((t) =>
+    ['bookings', 'rentals', 'dresses', 'activity_log', 'payments'].forEach((t) =>
       ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, () => {
         clearTimeout(loadT); loadT = setTimeout(load, 400);
       }));
@@ -87,9 +88,10 @@
   /* ---------------- views ---------------- */
   function render() {
     const pend = D.b.filter((b) => b.status === 'Pending').length;
+    const payPend = D.p.filter((x) => x.status === 'Submitted').length;
     $('#nav').innerHTML = TABS.map((t) =>
-      `<button class="${t === tab ? 'on' : ''}" data-act="tab" data-t="${t}">${t}${t === 'Bookings' && pend ? ' (' + pend + ')' : ''}</button>`).join('');
-    $('#main').innerHTML = ({ Overview: vOverview, Bookings: vBookings, Dresses: vDresses, Rentals: vRentals, Activity: vActivity })[tab]();
+      `<button class="${t === tab ? 'on' : ''}" data-act="tab" data-t="${t}">${t}${t === 'Bookings' && pend ? ' (' + pend + ')' : ''}${t === 'Payments' && payPend ? ' (' + payPend + ')' : ''}</button>`).join('');
+    $('#main').innerHTML = ({ Overview: vOverview, Bookings: vBookings, Payments: vPayments, Products: vDresses, Rentals: vRentals, Activity: vActivity })[tab]();
   }
 
   function vOverview() {
@@ -108,10 +110,10 @@
     <div class="top"><h2>Overview</h2><button class="btn ghost noprint" data-act="print">Print report</button></div>
     <div class="cards">
       ${card('Pending requests', cnt('Pending'))}${card('Accepted', cnt('Accepted'))}${card('Declined', cnt('Declined'))}
-      ${card('Revenue (paid)', peso(sum(paid)))}${card('Reserved, unpaid', peso(sum(reserved)))}${card('Dresses', D.d.length)}
+      ${card('Payments to confirm', D.p.filter((x) => x.status === 'Submitted').length)}${card('Revenue (paid)', peso(sum(paid)))}${card('Reserved, unpaid', peso(sum(reserved)))}${card('Products', D.d.length)}
     </div>
     <div class="panel"><h3>Most rented</h3>${topA.length
-      ? `<table><thead><tr><th>Dress</th><th class="r">Rentals</th></tr></thead><tbody>${topA.map(([n, c]) => `<tr><td>${esc(n)}</td><td class="r">${c}</td></tr>`).join('')}</tbody></table>`
+      ? `<table><thead><tr><th>Product</th><th class="r">Rentals</th></tr></thead><tbody>${topA.map(([n, c]) => `<tr><td>${esc(n)}</td><td class="r">${c}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty">No rentals yet.</div>'}</div>
     <div class="panel"><h3>Revenue by month</h3>${monA.length
       ? `<table><thead><tr><th>Month</th><th></th><th class="r">Revenue</th></tr></thead><tbody>${monA.map(([m, v]) => `<tr><td>${m}</td><td style="width:55%"><div class="bar" style="width:${v / mx * 100}%"></div></td><td class="r">${peso(v)}</td></tr>`).join('')}</tbody>
@@ -131,12 +133,12 @@
       <td>${b.status === 'Pending' ? `<button class="btn sm" data-act="review" data-id="${b.id}">Review</button>` : '<small>' + esc(b.decided_by || '') + '</small><br>'} <button class="btn sm danger" data-act="delbooking" data-id="${b.id}">Delete</button></td></tr>`).join('');
     return `<div class="top"><h2>Booking requests</h2><div class="tabs">${tabs}</div></div>
     <div class="panel">${list.length
-      ? `<table><thead><tr><th>Dress</th><th>Customer</th><th>Contact</th><th>Event date</th><th>Note</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+      ? `<table><thead><tr><th>Product</th><th>Customer</th><th>Contact</th><th>Event date</th><th>Note</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
       : '<div class="empty">No requests here.</div>'}</div>`;
   }
 
   function vDresses() {
-    return `<div class="top"><h2>Dresses</h2><button class="btn" data-act="newdress">+ Add dress</button></div>
+    return `<div class="top"><h2>Products</h2><button class="btn" data-act="newdress">+ Add product</button></div>
     ${D.d.length ? `<div class="grid">${D.d.map((d) => `<div class="dress">
       <div class="ph" ${d.photos && d.photos[0] ? `style="background-image:url('${esc(d.photos[0])}')"` : ''}>${d.photos && d.photos[0] ? '' : 'No photo'}</div>
       <div class="in"><h4>${esc(d.name)}</h4>
@@ -144,7 +146,7 @@
         <div><b>${peso(d.price)}</b> <span class="pill ${esc(d.status)}">${esc(d.status)}</span></div>
         <span class="meta">${(d.photos || []).length} photo${(d.photos || []).length === 1 ? '' : 's'}</span>
         <div class="acts"><button class="btn sm" data-act="editdress" data-id="${d.id}">Edit</button><button class="btn sm danger" data-act="deldress" data-id="${d.id}">Delete</button></div>
-      </div></div>`).join('')}</div>` : '<div class="panel"><div class="empty">No dresses yet.</div></div>'}`;
+      </div></div>`).join('')}</div>` : '<div class="panel"><div class="empty">No products yet.</div></div>'}`;
   }
 
   function vRentals() {
@@ -154,7 +156,7 @@
       <td class="r">${peso(r.amount)}</td>
       <td class="r"><button class="btn sm danger noprint" data-act="delrental" data-id="${r.id}">Delete</button></td></tr>`).join('');
     return `<div class="top"><h2>Rentals</h2></div><div class="panel">${D.r.length
-      ? `<table><thead><tr><th>Dress</th><th>Customer</th><th>Contact</th><th>Event date</th><th>Status</th><th class="r">Amount</th><th></th></tr></thead><tbody>${rows}</tbody>
+      ? `<table><thead><tr><th>Product</th><th>Customer</th><th>Contact</th><th>Event date</th><th>Status</th><th class="r">Amount</th><th></th></tr></thead><tbody>${rows}</tbody>
          <tfoot><tr><td colspan="5">Total (excluding cancelled)</td><td class="r">${peso(total)}</td><td></td></tr></tfoot></table>`
       : '<div class="empty">No rentals yet. Accept a booking to create one.</div>'}</div>`;
   }
@@ -172,7 +174,7 @@
     dlg.innerHTML = `<h3>${esc(b.dress_name)}</h3>
       <p>${esc(b.customer)} · ${esc(b.contact)}<br>Event date: <b>${fd(b.event_date)}</b>${b.message ? '<br>Note: ' + esc(b.message) : ''}</p>
       <p class="hint">Your decision and remarks will show on the customer's Track booking page.</p>
-      ${clash ? '<p class="err">Warning: this dress is already booked for that date.</p>' : ''}
+      ${clash ? '<p class="err">Warning: this product is already booked for that date.</p>' : ''}
       <label for="rm">Remarks (the customer will read this; required when declining)</label>
       <textarea id="rm" maxlength="500"></textarea>
       <div class="err" id="derr"></div>
@@ -226,7 +228,7 @@
     d = d || { name: '', category: 'Long Dress', price: '', bust: '', waist: '', description: '', status: 'Available', photos: [] };
     items = (d.photos || []).map((u) => ({ url: u }));
     const opt = (a, v) => a.map((o) => `<option${o === v ? ' selected' : ''}>${o}</option>`).join('');
-    dlg.innerHTML = `<h3>${d.id ? 'Edit dress' : 'Add dress'}</h3>
+    dlg.innerHTML = `<h3>${d.id ? 'Edit product' : 'Add product'}</h3>
     <form id="df"><input type="hidden" name="did" value="${esc(d.id || '')}">
       <label>Name</label><input name="name" required value="${esc(d.name)}">
       <div class="two">
@@ -242,7 +244,7 @@
       <label>Photos <span id="phc" style="font-weight:400"></span></label>
       <div class="thumbs" id="th"></div>
       <input type="file" id="pics" accept="image/*" multiple style="margin-top:8px">
-      <div class="hint">Choose several photos at once, or add more any time (up to ${MAX_PHOTOS}). Click a photo to make it the cover. Set status to Unavailable to hide a dress from the website.</div>
+      <div class="hint">Choose several photos at once, or add more any time (up to ${MAX_PHOTOS}). Click a photo to make it the cover. Set status to Unavailable to hide a product from the website.</div>
       <div class="err" id="derr"></div>
       <div class="row"><button class="btn" id="sv">Save</button><button type="button" class="btn ghost" data-act="close">Cancel</button></div>
     </form>`;
@@ -277,9 +279,61 @@
     btn.disabled = false; btn.textContent = 'Save';
     if (error) { er.textContent = error.message; return; }
     dlg.close();
-    toast((id ? 'Dress updated' : 'Dress added') + ' with ' + urls.length + ' photo' + (urls.length === 1 ? '' : 's') + '.');
+    toast((id ? 'Product updated' : 'Product added') + ' with ' + urls.length + ' photo' + (urls.length === 1 ? '' : 's') + '.');
     load();
   });
+
+  /* ---------------- payments ---------------- */
+  const METHOD = { cash: 'Cash', gcash: 'GCash', bank: 'Bank transfer' };
+  const payItems = (p) => (p.booking_ids || []).map((id) => {
+    const b = D.b.find((x) => x.id === id);
+    return b ? b.dress_name + ' (' + fd(b.event_date) + ')' : 'a booking';
+  }).join(', ');
+
+  function vPayments() {
+    const rows = D.p.map((p) => `<tr>
+      <td>${dt(p.created_at)}</td>
+      <td><b>${esc(p.customer)}</b><br><small>${esc(p.contact)}</small></td>
+      <td>${esc(payItems(p))}</td>
+      <td>${METHOD[p.method] || esc(p.method)}${p.reference ? '<br><small>Ref ' + esc(p.reference) + '</small>' : ''}</td>
+      <td class="r">${peso(p.amount)}</td>
+      <td><span class="pill ${p.status === 'Confirmed' ? 'Paid' : p.status === 'Rejected' ? 'Cancelled' : 'Pending'}">${p.status}</span>${p.admin_note ? '<br><small>' + esc(p.admin_note) + '</small>' : ''}</td>
+      <td><button class="btn sm ${p.status === 'Submitted' ? '' : 'ghost'}" data-act="payopen" data-id="${p.id}">${p.status === 'Submitted' ? 'Review' : 'View'}</button></td></tr>`).join('');
+    return `<div class="top"><h2>Payments</h2></div><div class="panel">${D.p.length
+      ? `<table><thead><tr><th>Sent</th><th>Customer</th><th>For</th><th>Method</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+      : '<div class="empty">No payments yet. They appear here when a customer checks out.</div>'}</div>`;
+  }
+
+  async function openPayment(id) {
+    const p = D.p.find((x) => x.id === id);
+    const open = p.status === 'Submitted';
+    dlg.innerHTML = `<h3>${METHOD[p.method] || esc(p.method)} · ${peso(p.amount)}</h3>
+      <p>${esc(p.customer)} · ${esc(p.contact)}<br>${esc(payItems(p))}${p.reference ? '<br>Reference: <b>' + esc(p.reference) + '</b>' : ''}</p>
+      <div id="pf">${p.proof_path ? '<p class="hint">Loading proof…</p>' : '<p class="hint">Cash: no proof needed. Confirm once you have received the money.</p>'}</div>
+      ${open ? '<label for="pn">Note for the customer (required when rejecting)</label><textarea id="pn" maxlength="300"></textarea>' : ''}
+      <div class="err" id="derr"></div>
+      <div class="row" style="margin-top:12px">
+        ${open ? `<button class="btn" data-act="payok" data-id="${id}">Confirm payment</button><button class="btn danger" data-act="payno" data-id="${id}">Reject</button>` : ''}
+        <button class="btn ghost" data-act="close">Close</button>
+      </div>`;
+    dlg.showModal();
+    if (p.proof_path) {
+      const { data, error } = await sb.storage.from('payment-proofs').createSignedUrl(p.proof_path, 3600);
+      $('#pf').innerHTML = error
+        ? '<p class="err">Could not load the proof: ' + esc(error.message) + '</p>'
+        : `<a href="${esc(data.signedUrl)}" target="_blank" rel="noopener"><img src="${esc(data.signedUrl)}" alt="Proof of payment" style="max-width:100%;max-height:55vh;display:block;margin:8px auto;border:1px solid #ecdcec"></a><p class="hint">Click the image to open it full size. Check the amount, date and reference.</p>`;
+    }
+  }
+
+  async function decidePay(id, decision) {
+    const note = $('#pn') ? $('#pn').value : '';
+    if (decision === 'Rejected' && !note.trim()) { $('#derr').textContent = 'Please write a note so the customer knows what to fix.'; return; }
+    const { error } = await sb.rpc('decide_payment', { p_id: id, p_decision: decision, p_note: note });
+    if (error) { $('#derr').textContent = error.message; return; }
+    dlg.close();
+    toast(decision === 'Confirmed' ? 'Payment confirmed. The rental is now Paid.' : 'Payment rejected. The customer can send a new proof.');
+    load();
+  }
 
   /* ---------------- clicks ---------------- */
   document.addEventListener('click', async (e) => {
@@ -299,10 +353,10 @@
     else if (act === 'rmph') { items.splice(+el.dataset.i, 1); thumbs(); }
     else if (act === 'cover') { items.unshift(items.splice(+el.dataset.i, 1)[0]); thumbs(); }
     else if (act === 'deldress') {
-      if (!confirm('Delete this dress? Past bookings keep its name.')) return;
+      if (!confirm('Delete this product? Past bookings keep its name.')) return;
       const { error } = await sb.from('dresses').delete().eq('id', id);
       if (error) return toast(error.message);
-      toast('Dress deleted.'); load();
+      toast('Product deleted.'); load();
     }
     else if (act === 'delbooking') {
       const b = D.b.find((x) => x.id === id);
@@ -322,6 +376,9 @@
       if (error) return toast(error.message);
       toast('Rental deleted.'); load();
     }
+    else if (act === 'payopen') openPayment(id);
+    else if (act === 'payok') decidePay(id, 'Confirmed');
+    else if (act === 'payno') decidePay(id, 'Rejected');
   });
 
   document.addEventListener('change', async (e) => {
