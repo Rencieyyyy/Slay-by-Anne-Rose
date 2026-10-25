@@ -1,7 +1,8 @@
 /* Slay by Anne&Rose: "Track my booking" + checkout (Cash / GCash / Bank transfer).
-   Add to index.html, after shop-live.js:  <script src="track.js?v=3"></script>
+   Add to index.html, after shop-live.js:  <script src="track.js?v=4"></script>
    Any link or button with class "js-track" opens it.
-   Needs supabase-payments.sql to be run once in Supabase. */
+   Handles rentals AND purchases (purchases have no event date and no deposit).
+   Needs sale-no-deposit.sql to be run once in Supabase. */
 (function () {
   'use strict';
 
@@ -10,13 +11,13 @@
 
   /* ===== YOUR PAYMENT SETTINGS: edit the names and add your QR image files ===== */
   var PAY = {
-    cash: 'Pay in cash when you fit or pick up your dress at our studio. We will mark your rental as paid once we receive it.',
+    cash: 'Pay in cash when you fit or pick up your item at our studio. We will mark your order as paid once we receive it.',
     gcash: [
       { img: 'gcash.png', name: 'GCash', details: '' }
     ],
     bank: [
       { img: 'bank1.png', name: 'Bank transfer 1', details: '' },
-      { img: 'bank2.png', name: 'Bank transfer 2', details: '' }
+      { img: 'bank  2.png', name: 'Bank transfer 2', details: '' }
     ]
   };
   var METHODS = { cash: 'Cash', gcash: 'GCash', bank: 'Bank transfer' };
@@ -106,35 +107,46 @@
   }
 
   function view(r) {
-    var s, cls, msg, extra = '';
-    if (r.status === 'Declined') { s = 'Not accepted'; cls = 'no'; msg = 'Sorry, we could not accept this booking.'; }
-    else if (r.status === 'Pending') { s = 'Pending'; cls = 'wait'; msg = 'We are checking the dress and your date. This page refreshes by itself.'; }
-    else if (r.rental_status === 'Paid') { s = 'Paid'; cls = 'ok'; msg = 'Payment confirmed. Thank you for renting with Slay by Anne &amp; Rose!'; }
-    else if (r.rental_status === 'Returned') { s = 'Returned'; cls = 'ok'; msg = 'The dress has been returned. Thank you for renting with us!'; }
-    else if (r.rental_status === 'Cancelled') { s = 'Cancelled'; cls = 'no'; msg = 'This rental was cancelled.'; }
+    var s, cls, msg, extra = '', sale = !!r.is_sale;
+    if (r.status === 'Declined') { s = 'Not accepted'; cls = 'no'; msg = 'Sorry, we could not accept this ' + (sale ? 'order' : 'booking') + '.'; }
+    else if (r.status === 'Pending') { s = 'Pending'; cls = 'wait'; msg = sale ? 'We are checking this item. This page refreshes by itself.' : 'We are checking the dress and your date. This page refreshes by itself.'; }
+    else if (r.rental_status === 'Paid') { s = 'Paid'; cls = 'ok'; msg = sale ? 'Payment confirmed. Thank you for your purchase from Slay by Anne &amp; Rose!' : 'Payment confirmed. Thank you for renting with Slay by Anne &amp; Rose!' + depNote(r); }
+    else if (r.rental_status === 'Returned') { s = 'Returned'; cls = 'ok'; msg = (r.return_status === 'Late' ? 'The dress was returned late.' : 'The dress was returned on time.') + ' Thank you for renting with us!' + depNote(r); }
+    else if (r.rental_status === 'Cancelled') { s = 'Cancelled'; cls = 'no'; msg = sale ? 'This order was cancelled.' : 'This rental was cancelled.'; }
     else if (r.pay_status === 'Submitted') {
       s = 'Payment sent'; cls = 'wait';
       msg = 'Thank you! We received your ' + esc(METHODS[r.pay_method] || '') + ' payment and will confirm it soon.';
     } else {
       s = 'Accepted'; cls = 'ok';
-      msg = 'Accepted! Your dress is reserved for this date. Please complete your payment below.';
+      msg = sale ? 'Accepted! This item is reserved for you. Please complete your payment below.'
+                 : 'Accepted! Your dress is reserved for this date. Please complete your payment below.';
       if (r.pay_status === 'Rejected') {
         extra = '<p class="trk-rem"><b>Your last payment was not accepted.</b> ' + esc(r.pay_note || '') + ' Please send a new proof.</p>';
       }
     }
     var pick = payable(r)
-      ? '<label class="trk-pick"><input type="checkbox" data-pick="' + esc(r.booking_id) + '"' + (sel[r.booking_id] ? ' checked' : '') + '> Pay for this: <b>' + peso(r.amount) + '</b></label>'
+      ? '<label class="trk-pick"><input type="checkbox" data-pick="' + esc(r.booking_id) + '"' + (sel[r.booking_id] ? ' checked' : '') + '> Pay for this: <b>' + peso(due(r)) + '</b>' + (Number(r.deposit_amount) ? ' <small>(includes ' + peso(r.deposit_amount) + ' refundable deposit)</small>' : '') + '</label>'
       : '';
     return '<div class="trk-card"><div class="trk-top"><strong>' + esc(r.dress_name) + '</strong>' +
       '<span class="trk-pill ' + cls + '">' + s + '</span></div>' +
-      '<div class="trk-date">' + esc(niceDate(r.event_date)) + '</div>' +
+      '<div class="trk-date">' + (sale ? 'Purchase' : esc(niceDate(r.event_date))) + '</div>' +
+      (r.return_due && !r.return_status && (r.rental_status === 'Reserved' || r.rental_status === 'Paid') ? '<div class="trk-date">Please return by ' + esc(niceDate(r.return_due)) + '</div>' : '') +
       '<p>' + msg + '</p>' + extra +
       (r.remarks ? '<p class="trk-rem"><b>Message from us:</b> ' + esc(r.remarks) + '</p>' : '') +
       pick + '</div>';
   }
 
   function chosen() { return rows.filter(function (r) { return payable(r) && sel[r.booking_id]; }); }
-  function sumOf(list) { return list.reduce(function (t, r) { return t + Number(r.amount || 0); }, 0); }
+  function due(r) { return Number(r.amount || 0) + Number(r.deposit_amount || 0); }
+  function sumOf(list) { return list.reduce(function (t, r) { return t + due(r); }, 0); }
+  function depNote(r) {
+    var d = Number(r.deposit_amount || 0);
+    if (!d) return '';
+    if (r.deposit_status === 'Paid') return ' Your security deposit of ' + peso(d) + ' is held and will be refunded when you return the dress.';
+    if (r.deposit_status === 'Returned') return ' Your security deposit of ' + peso(d) + ' has been returned to you.';
+    if (r.deposit_status === 'Forfeited') return ' Your security deposit was not refunded.';
+    return '';
+  }
 
   function showList() {
     stage = 'list';
@@ -143,7 +155,7 @@
     if (rows.some(payable)) {
       var c = chosen();
       html += '<button type="button" class="trk-btn" id="trkCheckout"' + (c.length ? '' : ' disabled') + '>' +
-        (c.length ? 'Checkout \u00B7 ' + peso(sumOf(c)) : 'Select a dress to pay') + '</button>';
+        (c.length ? 'Checkout \u00B7 ' + peso(sumOf(c)) : 'Select an item to pay') + '</button>';
     }
     html += '<p class="trk-note">Last checked ' + new Date().toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' }) + '</p>';
     out.innerHTML = html;
@@ -158,8 +170,12 @@
     $('#trkOut').innerHTML =
       '<button type="button" class="trk-link" id="trkBack">\u2190 Back</button>' +
       '<h4>Checkout</h4>' +
-      c.map(function (r) { return '<div class="trk-line"><span>' + esc(r.dress_name) + ' \u00B7 ' + esc(niceDate(r.event_date)) + '</span><b>' + peso(r.amount) + '</b></div>'; }).join('') +
+      c.map(function (r) {
+        return '<div class="trk-line"><span>' + esc(r.dress_name) + ' \u00B7 ' + (r.is_sale ? 'Purchase' : esc(niceDate(r.event_date))) + '</span><b>' + peso(r.amount) + '</b></div>' +
+          (Number(r.deposit_amount) ? '<div class="trk-line"><span>Security deposit (refundable)</span><b>' + peso(r.deposit_amount) + '</b></div>' : '');
+      }).join('') +
       '<div class="trk-total"><span>Total</span><strong>' + peso(sumOf(c)) + '</strong></div>' +
+      (c.some(function (r) { return Number(r.deposit_amount) > 0; }) ? '<p class="trk-note">The security deposit is refunded when you return the dress on time and in good condition.</p>' : '') +
       '<p class="trk-sub" style="margin-top:12px">How would you like to pay?</p>' +
       '<div class="trk-ms">' +
         '<button type="button" class="trk-m" data-m="cash">Cash</button>' +
@@ -262,7 +278,7 @@
     $('#trkOut').innerHTML =
       '<div class="trk-thanks"><h4>Thank you!</h4>' +
       (cash
-        ? '<p>We noted that you will pay in cash.</p><p>Please bring your payment when you fit or pick up your dress. We will mark it as paid once we receive it.</p>'
+        ? '<p>We noted that you will pay in cash.</p><p>Please bring your payment when you fit or pick up your item. We will mark it as paid once we receive it.</p>'
         : '<p>We received your proof of payment.</p><p>We will check it and confirm your payment soon. You can come back here any time to see the status.</p>') +
       '<p>We cannot wait to see you slay your special day.</p></div>' +
       '<button type="button" class="trk-btn" id="trkAgain">Back to my bookings</button>';

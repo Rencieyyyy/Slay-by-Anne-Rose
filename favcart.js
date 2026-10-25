@@ -1,5 +1,6 @@
-/* Slay by Anne&Rose: favorites + rental cart + booking requests + search
+/* Slay by Anne&Rose: favorites + cart (rent AND buy) + booking requests + search
    Loaded by shop-live.js after script.js.
+   Rentals and purchases share ONE cart. Purchases have no event date and no deposit.
    The Track button lives in index.html and is handled by track.js. */
 (function () {
   'use strict';
@@ -40,6 +41,10 @@
   var doneName = '';
   var doneContact = '';
 
+  /* ---------- Cart helpers (rent vs buy) ---------- */
+  function hasRental() { return cart.some(function (i) { return !i.sale; }); }
+  function sendLabel() { return hasRental() ? 'Send booking request' : 'Send order request'; }
+
   /* ---------- Read product info from a card ---------- */
   function cardInfo(card) {
     var name = ($('h3', card) || {}).textContent || 'Item';
@@ -55,7 +60,8 @@
       price: parseInt(priceTxt.replace(/[^\d]/g, ''), 10) || 0,
       img: img ? img.getAttribute('src') : '',
       type: ($('.product-tag', card) || {}).textContent || cat,
-      size: m ? 'Bust ' + m[1] + ', Waist ' + m[2] : ''
+      size: m ? 'Bust ' + m[1] + ', Waist ' + m[2] : '',
+      sale: card.hasAttribute('data-sale')
     };
   }
 
@@ -150,27 +156,32 @@
         : '';
     } else if (doneName) {
       body.innerHTML = '<p class="fc-empty"><b>Request sent. Thank you, ' + esc(doneName) + '!</b><br>' +
-        'We will check the dress and your event date. Tap <b>Track my booking</b> any time to see if it is accepted or declined.</p>';
+        'We will check availability (and your event date for rentals). Tap <b>Track my booking</b> any time to see if it is accepted or declined.</p>';
       foot.innerHTML = '<button class="fc-btn" data-fc="tracknow">Track my booking</button>' +
         '<button class="fc-link fc-clear" data-fc="close">Back to shop</button>';
     } else {
       body.innerHTML = cart.length
         ? cart.map(function (i) { return itemRow(i, 'cart'); }).join('')
-        : '<p class="fc-empty">Your cart is empty.<br>Tap <b>Rent Now</b> on a dress to add it.</p>';
+        : '<p class="fc-empty">Your cart is empty.<br>Tap <b>Rent Now</b> or <b>Buy Now</b> to add an item.</p>';
       if (cart.length) {
         var total = cart.reduce(function (s, i) { return s + i.price; }, 0);
+        var rental = hasRental();
+        var mixed = rental && cart.some(function (i) { return i.sale; });
         var date = '';
         try { date = localStorage.getItem('slay_date') || ''; } catch (e) {}
         if (date && date < todayStr()) { date = ''; try { localStorage.removeItem('slay_date'); } catch (e) {} }
         foot.innerHTML =
-          '<label class="fc-date">Event date <input type="date" id="fcDate" min="' + todayStr() + '" value="' + esc(date) + '">' +
-            '<small class="fc-datehint" id="fcDateHint">' + (date ? esc(niceDate(date)) : 'Format: day / month / year') + '</small></label>' +
+          (rental
+            ? '<label class="fc-date">Event date <input type="date" id="fcDate" min="' + todayStr() + '" value="' + esc(date) + '">' +
+                '<small class="fc-datehint" id="fcDateHint">' + (date ? esc(niceDate(date)) : 'Format: day / month / year') + '</small></label>'
+            : '') +
+          (mixed ? '<small class="fc-datehint">The event date is for your rentals. Items for sale are a purchase.</small>' : '') +
           '<label class="fc-field">Your name <input id="fcName" maxlength="100" autocomplete="name" value="' + esc(draft.name) + '"></label>' +
           '<label class="fc-field">Mobile number or Facebook name <input id="fcContact" maxlength="100" autocomplete="tel" value="' + esc(draft.contact) + '"></label>' +
-          '<label class="fc-field">Note (optional) <textarea id="fcNote" maxlength="500">' + esc(draft.note) + '</textarea></label>' +
+          '<label class="fc-field">Note (optional) <textarea id="fcNote" maxlength="450">' + esc(draft.note) + '</textarea></label>' +
           '<input id="fcHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">' +
-          '<div class="fc-total"><span>Estimated total</span><strong>' + peso(total) + '</strong></div>' +
-          '<button class="fc-btn" data-fc="book">Send booking request</button>' +
+          '<div class="fc-total"><span>' + (rental ? 'Estimated total' : 'Total') + '</span><strong>' + peso(total) + '</strong></div>' +
+          '<button class="fc-btn" data-fc="book">' + sendLabel() + '</button>' +
           '<button class="fc-link fc-clear" data-fc="send">Or message us on Facebook instead</button>' +
           '<button class="fc-link fc-clear" data-fc="clear">Clear cart</button>';
       } else {
@@ -200,10 +211,10 @@
         heart.setAttribute('aria-pressed', isFav ? 'true' : 'false');
         heart.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
       }
-      var btn = $('.product-btn', card);
+      var btn = $('.product-btn, .sale-btn', card);
       if (btn) {
         var inCart = findIn(cart, info.id) > -1;
-        btn.textContent = inCart ? 'In Cart \u2713' : 'Rent Now';
+        btn.textContent = inCart ? 'In Cart \u2713' : (info.sale ? 'Buy Now' : 'Rent Now');
       }
     });
 
@@ -229,13 +240,18 @@
     var date = '';
     try { date = localStorage.getItem('slay_date') || ''; } catch (e) {}
     var total = 0;
-    var lines = cart.map(function (i) {
+    function line(i) {
       total += i.price;
       return '- ' + i.name + ' (' + i.type + (i.size ? ', ' + i.size : '') + ') - ' + peso(i.price);
-    });
-    return 'Hi Slay by Anne&Rose! I would like to rent:\n' + lines.join('\n') +
+    }
+    var rent = cart.filter(function (i) { return !i.sale; });
+    var buy = cart.filter(function (i) { return i.sale; });
+    var parts = [];
+    if (rent.length) parts.push('I would like to rent:\n' + rent.map(line).join('\n'));
+    if (buy.length) parts.push('I would like to buy:\n' + buy.map(line).join('\n'));
+    return 'Hi Slay by Anne&Rose! ' + parts.join('\n\n') +
       '\nEstimated total: ' + peso(total) +
-      (date ? '\nEvent date: ' + niceDate(date) : '') +
+      (rent.length && date ? '\nEvent date: ' + niceDate(date) : '') +
       '\nIs it available?';
   }
 
@@ -269,12 +285,15 @@
     if (($('#fcHp') || {}).value) return;
     if (!cart.length) return;
 
+    var rental = hasRental();
     var date = '';
     try { date = localStorage.getItem('slay_date') || ''; } catch (e) {}
     var name = draft.name.trim(), contact = draft.contact.trim(), note = draft.note.trim();
 
-    if (!date) { toast('Please choose your event date'); $('#fcDate').focus(); return; }
-    if (date < todayStr()) { toast(niceDate(date) + ' has already passed. Please pick a future date.'); $('#fcDate').focus(); return; }
+    if (rental) {
+      if (!date) { toast('Please choose your event date'); $('#fcDate').focus(); return; }
+      if (date < todayStr()) { toast(niceDate(date) + ' has already passed. Please pick a future date.'); $('#fcDate').focus(); return; }
+    }
     if (name.length < 2) { toast('Please enter your name'); $('#fcName').focus(); return; }
     if (contact.length < 5) { toast('Please enter your mobile number or Facebook name'); $('#fcContact').focus(); return; }
 
@@ -292,8 +311,9 @@
           dress_name: i.name,
           customer: name,
           contact: contact,
-          event_date: date,
-          message: note || null
+          /* a purchase has no event: today's date is only a placeholder */
+          event_date: i.sale ? todayStr() : date,
+          message: i.sale ? ('PURCHASE' + (note ? ' - ' + note : '')).slice(0, 500) : (note || null)
         };
       });
       return fetch(SUPABASE_URL + '/rest/v1/bookings', {
@@ -318,7 +338,7 @@
       console.error('Booking error:', err);
       toast('Could not send: ' + String(err.message).slice(0, 140));
       btn.disabled = false;
-      btn.textContent = 'Send booking request';
+      btn.textContent = sendLabel();
     });
   }
 
@@ -333,7 +353,8 @@
       return;
     }
 
-    var rent = t.closest('.product-btn');
+    /* Rent Now and Buy Now both go into the same cart */
+    var rent = t.closest('.product-btn, .sale-btn');
     if (rent) {
       var c = rent.closest('.product');
       if (c) {
@@ -424,7 +445,9 @@
     var shown = 0;
 
     $$('.product').forEach(function (card) {
-      var okCat = filter === 'all' || card.getAttribute('data-category') === filter;
+      /* "For Sale" shows every sale item; other tabs match the real category */
+      var okCat = filter === 'all'
+        || (filter === 'for-sale' ? card.hasAttribute('data-sale') : card.getAttribute('data-category') === filter);
       var text = card.textContent.toLowerCase();
       var okText = words.every(function (w) { return text.indexOf(w) > -1; });
       var show = okCat && okText;
@@ -443,7 +466,9 @@
       if (grid && grid.parentNode) grid.parentNode.insertBefore(msg, grid.nextSibling);
     }
     msg.hidden = shown > 0;
-    msg.textContent = shown > 0 ? '' : 'No dresses found. Try another word or clear the search.';
+    msg.textContent = shown > 0 ? '' : (activeFilter() === 'for-sale' && !words.length
+      ? 'Nothing for sale right now. Check back soon!'
+      : 'No dresses found. Try another word or clear the search.');
   }
 
   function initSearch() {
